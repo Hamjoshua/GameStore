@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% set img = "https://image.api.playstation.com/cdn/EP0001/CUSA10326_00/FREE_CONTENTqIIokxHZj8XPZKYzv656/1.jpg" %}
+<div class="container text-white">
+    <div style="background-color: #333"><h1>{{game.name}}</h1>
+        <table class="table text-white" style="max-width: 20em; float:right; background-color: #111">
+            <tr>
+                {% if genres|length == 1 %}
+                <th scope="row">
+                    Жанр
+                </th>
+                <td>
+                    {{ genres[0].genre.name }}
+                </td>
+
+                {% else %}
+                <th scope="row">
+                    Жанры
+                </th>
+                <td>
+                    {% for genre in genres %}
+                    {{ genre.genre.name }}{{ ", " if not loop.last else "" }}
+                    {% endfor %}
+                </td>
+                {% endif %}
+            </tr>
+            <tr>
+                {% if platforms|length == 1 %}
+                <th scope="row">
+                    Платформа
+                </th>
+                <td>
+                    {{ platforms[0].platform.name }}
+                </td>
+
+                {% else %}
+                <th scope="row">
+                    Платформы
+                </th>
+                <td>
+                    {% for platform in platforms %}
+                    {{ platform.platform.name }}
+                    {{ ", " if not loop.last else "" }}
+                    {% endfor %}
+                </td>
+                {% endif %}
+            </tr>
+            <tr>
+                <th scope="row">
+                    Разработчик
+                </th>
+                <td>
+                    {{ game.developer.name }}
+                </td>
+            </tr>
+            <th scope="row">
+                Издатель
+            </th>
+            <td>
+                {{ game.publisher.name }}
+            </td>
+            </tr>
+        </table>
+        <div style="margin-right: 20em">
+            <div id="carouselFadeExampleIndicators" class="carousel slide carousel-fade"
+                 data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    {% if img_urls|length != 1 %}
+                    {% for url in img_urls %}
+                    {% if loop.first %}
+                    <button type="button" data-bs-target="#carouselFadeExampleIndicators"
+                            data-bs-slide-to="0" class="active" aria-current="true"
+                            aria-label="Slide 1"></button>
+                    {% else %}
+                    <button type="button" data-bs-target="#carouselFadeExampleIndicators"
+                            data-bs-slide-to="{{ loop.index - 1 }}"
+                            aria-label="Slide {{ loop.index - 1 }}"></button>
+                    {% endif %}
+                    {% endfor %}
+                    {% endif %}
+                </div>
+                <div class="carousel-inner">
+                    {% for url in img_urls %}
+                    <div class="carousel-item {% if loop.first %} active {% endif %}">
+                        <div style="background-color: #111; height:450px; display:flex; justify-content: center">
+                            <img src="{{ url }}" alt="..." style="height:inherit">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if img_urls|length != 1 %}
+                <a class="carousel-control-prev" type="button"
+                   data-bs-target="#carouselFadeExampleIndicators" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </a>
+                <a class="carousel-control-next" type="button"
+                   data-bs-target="#carouselFadeExampleIndicators" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="card-body rounded-10 bg-dark">
+            {{ game.description }}
+        </div>
+</div>
+
+
+{% endblock %}
