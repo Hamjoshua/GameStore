@@ -17,3 +17,6 @@ class PlatformGame(SqlAlchemyBase, SerializerMixin):
 
     platform = orm.relation('Platform')
     game = orm.relation('Game')
+
+    def __repr__(self):
+        return f'<PlatformGame> id:{self.id} ({self.platform}, {self.game})'

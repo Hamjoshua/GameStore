@@ -17,3 +17,6 @@ class GenreGame(SqlAlchemyBase, SerializerMixin):
 
     game = orm.relation('Game')
     genre = orm.relation('Genre')
+
+    def __repr__(self):
+        return f'<GenreGame> id:{self.id} ({self.genre}, {self.game})'

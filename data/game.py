@@ -10,7 +10,7 @@ class Game(SqlAlchemyBase, SerializerMixin):
 
     id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False, primary_key=True, autoincrement=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
-    release_date = sqlalchemy.Column(sqlalchemy.Date, nullable=False)
+    release_date = sqlalchemy.Column(sqlalchemy.Date, nullable=True)
     description = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     publisher_id = sqlalchemy.Column(sqlalchemy.Integer,
                                      sqlalchemy.ForeignKey('publisher.id'),
@@ -19,6 +19,10 @@ class Game(SqlAlchemyBase, SerializerMixin):
                                      sqlalchemy.ForeignKey('developer.id'),
                                      nullable=False)
     rating = sqlalchemy.Column(sqlalchemy.Float, nullable=True)
+    price = sqlalchemy.Column(sqlalchemy.Integer, nullable=True, default=0)
 
     publisher = orm.relation('Publisher')
     developer = orm.relation('Developer')
+
+    def __repr__(self):
+        return f'<Game> id:{self.id} {self.name}'

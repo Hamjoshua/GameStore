@@ -1,7 +1,9 @@
-{% extends 'base.html' %}
+{% set title = game.name %}
+{% set can_edit = True %}
 
+{% extends 'base.html' %}
 {% block content %}
-{% set img = "https://image.api.playstation.com/cdn/EP0001/CUSA10326_00/FREE_CONTENTqIIokxHZj8XPZKYzv656/1.jpg" %}
+
 <div class="container text-white">
     <div style="background-color: #333"><h1>{{game.name}}</h1>
         <table class="table text-white" style="max-width: 20em; float:right; background-color: #111">
@@ -54,32 +56,47 @@
                     {{ game.developer.name }}
                 </td>
             </tr>
-            <th scope="row">
-                Издатель
-            </th>
-            <td>
-                {{ game.publisher.name }}
-            </td>
+            <tr>
+                <th scope="row">
+                    Издатель
+                </th>
+                <td>
+                    <a href="/publisher/{{ game.publisher.id }}" class="link-warning">
+                        {{ game.publisher.name }}
+                    </a>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">
+                    Дата релиза
+                </th>
+                <td>
+                    {{ game.release_date }}
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">
+                    Рейтинг
+                </th>
+                <td>
+                    {{ game.rating }}
+                </td>
             </tr>
         </table>
         <div style="margin-right: 20em">
-            <div id="carouselFadeExampleIndicators" class="carousel slide carousel-fade"
+            <div id="carousel-1" class="carousel slide carousel-fade"
                  data-bs-ride="carousel">
-                <div class="carousel-indicators">
-                    {% if img_urls|length != 1 %}
-                    {% for url in img_urls %}
+                <ol class="carousel-indicators">
+                {% if img_urls|length != 1 %}
+                {% for _ in get_images(game) %}
                     {% if loop.first %}
-                    <button type="button" data-bs-target="#carouselFadeExampleIndicators"
-                            data-bs-slide-to="0" class="active" aria-current="true"
-                            aria-label="Slide 1"></button>
+                    <li data-bs-target="#carousel-1" data-bs-slide-to="0" class="active"></li>
                     {% else %}
-                    <button type="button" data-bs-target="#carouselFadeExampleIndicators"
-                            data-bs-slide-to="{{ loop.index - 1 }}"
-                            aria-label="Slide {{ loop.index - 1 }}"></button>
+                    <li data-bs-target="#carousel-1" data-bs-slide-to="{{ loop.index - 1 }}"></li>
                     {% endif %}
-                    {% endfor %}
-                    {% endif %}
-                </div>
+                {% endfor %}
+                {% endif %}
+                </ol>
                 <div class="carousel-inner">
                     {% for url in img_urls %}
                     <div class="carousel-item {% if loop.first %} active {% endif %}">
@@ -91,12 +108,12 @@
                 </div>
                 {% if img_urls|length != 1 %}
                 <a class="carousel-control-prev" type="button"
-                   data-bs-target="#carouselFadeExampleIndicators" data-bs-slide="prev">
+                   data-bs-target="#carousel-1" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Previous</span>
                 </a>
                 <a class="carousel-control-next" type="button"
-                   data-bs-target="#carouselFadeExampleIndicators" data-bs-slide="next">
+                   data-bs-target="#carousel-1" data-bs-slide="next">
                     <span class="carousel-control-next-icon" aria-hidden="true"></span>
                     <span class="visually-hidden">Next</span>
                 </a>
@@ -107,6 +124,28 @@
             {{ game.description }}
         </div>
 </div>
+
+{% if usergame %}
+    <a href="/user/{{ current_user.id }}" class="btn btn-success float-end m-0">
+        Посмотреть в библиотеке
+    </a>
+{% else %}
+<form class="row align-items-center bg-secondary rounded-3 float-end m-0" action="" method="post">
+    <div class="col p-0">
+        <input type="submit" class="btn btn-success" id="buy" value="{% if game.price > 0 %}Купить{% else %}Играть{% endif %}">
+
+    </div>
+    <div class="col">
+        <p class="card-text m-auto">
+            {% if game.price > 0 %}
+                {{ game.price }} ₽
+            {% else %}
+                Бесплатно
+            {% endif %}
+        </p>
+    </div>
+</form>
+{% endif %}
 
 
 {% endblock %}

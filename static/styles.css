@@ -1,0 +1,119 @@
+#pub_game_description {
+  height: 170px;
+  overflow: hidden;
+}
+
+.image-holder-game{
+    height:450px;
+    background-color: #111;
+    display:flex;
+    justify-content: center
+}
+
+.image-holder-game img{
+    height: inherit;
+}
+
+.image-holder {
+  background-color: #111;
+  display: flex;
+  justify-content: center;
+}
+
+.image {
+  max-width: 360px;
+  max-height: 200px;
+}
+
+.image-holder-avatar {
+  display: flex;
+  align-items: center;
+  height: 100px;
+}
+
+.image-holder-avatar-big {
+  display: flex;
+  align-items: center;
+  margin: auto;
+  height: 200px;
+  /*background: #333;*/
+}
+
+.image-holder-avatar-overlay {
+  display: flex;
+  align-items: center;
+  height: 100px;
+  width: fit-content;
+  top: 17em;
+  position: absolute;
+  right: 1%;
+}
+
+
+.image-avatar {
+  max-width: 100px;
+  max-height: 100px;
+}
+
+.image-avatar-big {
+  max-width: 200px;
+  max-height: 200px;
+}
+
+.image-overlay-holder {
+  background-color: #111;
+  height: 450px;
+  display: flex;
+  justify-content: start;
+  overflow: hidden;
+  flex-direction: row;
+}
+
+.image-overlay-holder:hover .image-overlay {
+  opacity: 0.2;
+}
+
+.image-overlay-holder:hover div #description {
+  top: 0em;
+}
+
+.image-overlay {
+  height: inherit;
+  transition: opacity 1s ease;
+}
+
+.image-overlay-holder div #description {
+  top: 50em;
+  transition: top 1s ease;
+  position: relative;
+}
+
+.platforms-container {
+  position: absolute;
+  top: 19em;
+  width:50%
+}
+
+.footer {
+  margin-top: 15em;
+}
+
+.image-holder-avatar-user-big {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.image-avatar-user-bg {
+  position: relative;
+  bottom: 5em;
+  z-index: -1;
+  margin-bottom: -5.5em;
+  height:100px;
+  object-fit:cover;
+}
+
+.text-area{
+  height: 4em;
+  word-break: break-word;
+}

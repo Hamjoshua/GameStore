@@ -17,6 +17,11 @@ class User(SqlAlchemyBase, UserMixin, SerializerMixin):
     birthday = sqlalchemy.Column(sqlalchemy.Date, nullable=True)
     address = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     email = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    avatar_url = sqlalchemy.Column(sqlalchemy.String, nullable=True,
+                                default='\static\missing_avatar.png')
+    bg_url = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    body_bg_url = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     role_id = sqlalchemy.Column(sqlalchemy.Integer, sqlalchemy.ForeignKey('role.id'),
                                 nullable=False, default=1)
     role = orm.relation('Role')

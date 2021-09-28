@@ -1,0 +1,123 @@
+{% set title = 'Редактирование профиля' %}
+
+{% extends 'base.html' %}
+{% block content %}\
+{% from "_formhelpers.html" import render_field %}
+
+<style>
+#body_bg_url_img{
+  background-color: rgba(0,0,0,0.5) !important;
+  background-blend-mode: darken;
+  background-size: cover !important;
+  width: 100vw;
+  height: 100vw;
+}
+
+#body_bg_url_img, #bg_url_img, #avatar_url_img {
+  transition: filter 1s ease;
+  filter: none;
+}
+
+.highlighted{
+  filter: brightness(3) !important
+}
+</style>
+<img src="{{ form.body_bg_url.data }}" style="position: absolute; z-index: -4" id="body_bg_url_img">
+<form action="" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+<div class="container px-sm-4">
+    <div class="image-holder-avatar-user-big">
+        <img class="image-avatar-big m-auto shadow-lg" id="avatar_url_img" src="{{ form.avatar_url.data if form.avatar_url.data else '\static\missing_avatar.png' }}">
+        <div style="/*height: 50px;*/background-color: rgba(0,0,0,0.5);">
+            <p class="text-center text-white m-0 h2">{{ current_user.login }}</p>
+        </div>
+        <img id='bg_url_img' class="{{ 'border' if form.bg_url.data else '' }} rounded-0 border-light image-avatar-user-bg" src="{{ form.bg_url.data if form.bg_url.data else '' }}">
+    </div>
+    <ul class="nav nav-tabs nav-fill text-uppercase link-dark bg-light">
+        <li class="nav-item shadow-lg"><a class="nav-link link-dark border-2 border-dark border-top-0 border-bottom-0 border-start-0">Действие</a></li>
+        <li class="nav-item shadow-lg"><a class="nav-link link-dark" href="#">действие</a></li>
+        <li class="nav-item border-dark shadow-lg"><a class="nav-link link-dark border-2 border-dark border-top-0 border-bottom-0 border-end-0" href="#">действие</a></li>
+    </ul>
+    <div class="bg-dark">
+        <div class="card-body text-white border-0" style="background-color: #343a40;">
+            {{ render_field(form.avatar_url) }}
+            {{ render_field(form.bg_url) }}
+            {{ render_field(form.body_bg_url) }}
+        </div>
+7        <div class="card text-white border-0" style="background-color: #343a40;">
+            <div class="card-header" style="background-color:#343a40">
+                <h5 class="mb-0">Личная информация</h5>
+            </div>
+            <div class="card-body bg-secondary bg-gradient border-primary m-2">
+                {{ render_field(form.description) }}
+                {{ render_field(form.name) }}
+                {{ render_field(form.address) }}
+                {{ render_field(form.birthday) }}
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-flex m-2">
+    {{ form.submit(type="submit", class="btn btn-success m-auto") }}
+</div>
+</form>
+
+<script>
+        console.log(1);
+    var bg_url = document.getElementById('bg_url');
+    var body_bg_url = document.getElementById('body_bg_url');
+    var avatar_url = document.getElementById('avatar_url');
+    var urls = [bg_url, body_bg_url, avatar_url];
+    console.log(urls);
+    console.log(bg_url);
+    for(let i = 0; i < urls.length; i++){
+        elem = urls[i];
+        console.log(elem);
+        elem.onmouseover = onHover;
+        elem.onmouseout = onOver;
+        elem.onchange = changePic;
+    }
+
+
+    function changePic (evt) {
+    var input_id = evt.target.id;
+    var tgt = evt.target || window.event.srcElement,
+        files = tgt.files;
+
+    // FileReader support
+    if (FileReader && files && files.length) {
+        var fr = new FileReader();
+        fr.onload = function () {
+            console.log(fr.result);
+            console.log(input_id + '_img');
+            img = document.getElementById(input_id + '_img');
+            img.src = fr.result;
+        }
+        fr.readAsDataURL(files[0]);
+    }
+    // Not supported
+    else {
+        // fallback -- perhaps submit the input to an iframe and temporarily store
+        // them on the server until the user's session ends.
+    }
+}
+
+    function onHover( event ){
+            url_img_id = event.target.id + '_img';
+            url_img = document.getElementById(url_img_id);
+            url_img.classList.add('highlighted');
+            console.log('enter ' + event.target.id);
+        }
+
+    function onOver( event ){
+            url_img_id = event.target.id + '_img';
+            url_img = document.getElementById(url_img_id);
+            url_img.classList.remove('highlighted');
+            console.log('over ' + event.target.id);
+        }
+
+
+
+</script>
+
+{% endblock %}

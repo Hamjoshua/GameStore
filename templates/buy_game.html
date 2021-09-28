@@ -1,0 +1,22 @@
+{% set title = 'Покупка игры ' + game.name %}
+
+{% extends 'base.html' %}
+{% block content %}
+{% from "_formhelpers.html" import render_field %}
+
+<div class="container d-flex align-items-center flex-column text-white" style="margin-top:10em">
+    <div class="image-holder w-50">
+        <img class="image" src="{{ get_images(game)[0] }}">
+    </div>
+    <p class="h2">{{ game.name }}</p>
+    <p class="h6">Вы собираетесь купить эту игру за {{ game.price }} ₽</p>
+    <p class="h6 w-75 text-center">Введите код, который пришел в письме на ваш почтовый ящик, чтобы подтвердить покупку</p>
+    <form action="" method="post" class="align-items-end d-flex justify-content-center mt-5">
+        {{ form.hidden_tag() }}
+
+        {{ render_field(form.code) }}
+        <div class="mx-1">{{ form.submit(type="submit", class="btn btn-success") }}</div>
+    </form>
+</div>
+
+{% endblock %}

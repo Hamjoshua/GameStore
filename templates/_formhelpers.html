@@ -1,0 +1,38 @@
+{% macro render_field(field) %}
+<div>
+{% if field.id not in ['submit', 'csrf_token'] and field.type != 'HiddenField' %}
+<h5>
+    {{ field.label }}
+</h5>
+{% endif %}
+
+{% if field.type == 'PasswordField' %}
+    {{ field(class='form-control', type='password') }}
+{% elif field.type == 'TextAreaField' %}
+    {{ field(class='form-control text-area') }}
+{% elif 'почт' in field.name %}
+    {{ field(class='form-control', type='email') }}
+{% elif field.type == 'DateField' %}
+    {{ field(class='form-control', type='date') }}
+{% elif field.type in ['MultipleFileField', 'FileField'] %}
+    {{ field(class='form-control', type='file', id=field.name, accept=".jpg, .jpeg, .png, .gif") }}
+{% elif field.type in ['IntegerField', 'FloatField'] %}
+    {{ field(class='form-control', type='number') }}
+{% elif field.type == 'SubmitField' %}
+    <div class="d-flex m-2">
+        {{ field(type="submit", class="btn btn-success m-auto") }}
+    </div>
+{% else %}
+    {{ field(class='form-control')|safe }}
+{% endif %}
+
+
+{% if field.errors %}
+    {% for error in field.errors %}
+        <p class="alert alert-danger" role="alert">
+            {{ error }}
+        </p>
+    {% endfor %}
+{% endif %}
+</div>
+{% endmacro %}

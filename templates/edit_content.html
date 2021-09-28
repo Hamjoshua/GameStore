@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block content %}
+{% from "_formhelpers.html" import render_field %}
+
+{% set img_urls = get_images(game) if game else [] %}
+
+<form class="container text-white" action="" method="post" enctype="multipart/form-data">
+    {{ form.hidden_tag() }}
+    <div style="background-color: #333" class="p-3">
+        {% if avatar_on %}
+            <div class="image-holder-avatar-big">
+                <img class="image-avatar-big m-auto shadow-lg" id="avatar_url_img" src="{{ form.avatar_url.data }}">
+            </div>
+        {% elif images_on %}
+            <div id="carousel-1" class="carousel slide carousel-fade"
+                 data-bs-ride="carousel">
+                <ol class="carousel-indicators">
+                {% if img_urls|length != 1 %}
+                {% for _ in img_urls %}
+                    {% if loop.first %}
+                    <li data-bs-target="#carousel-1" data-bs-slide-to="0" class="active"></li>
+                    {% else %}
+                    <li data-bs-target="#carousel-1" data-bs-slide-to="{{ loop.index - 1 }}"></li>
+                    {% endif %}
+                {% endfor %}
+                {% endif %}
+                </ol>
+                <div class="carousel-inner">
+                    {% for url in img_urls %}
+                    <div class="carousel-item {% if loop.first %} active {% endif %}" id="carousel-item{{ loop.index - 1 }}">
+                        <div class="image-holder-game">
+                            <img src="{{ url }}" alt="..." id="image{{ loop.index - 1 }}">
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <a class="carousel-control-prev" type="button"
+                   data-bs-target="#carousel-1" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </a>
+                <a class="carousel-control-next" type="button"
+                   data-bs-target="#carousel-1" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </a>
+
+            </div>
+
+            <div id="fileList" class="d-flex flex-column pt-3 px-5 pb-1 mt-1 mb-1 bg-dark">
+                {% for url in img_urls %}
+                    <div id="fileField{{ loop.index - 1 }}" class="d-flex justify-content-center">
+                        <input type="file"
+                               id="file{{ loop.index - 1 }}" name="file{{ loop.index - 1 }}"
+                               class="form-control">
+                        <input class="btn btn-danger" value="Удалить" type="button">
+                    </div>
+                {% endfor %}
+            </div>
+            <input type="button" class="btn btn-success d-lg-table m-auto" id="addBtn" value="Добавить">
+        {% endif %}
+        <table class="table text-white" style="max-width: 20em; float:right; background-color: #111">
+            {% for field in form %}
+            <tr>
+                {{ render_field(field) }}
+            </tr>
+            {% endfor %}
+        </table>
+</div>
+</form>
+
+    {% if images_on %}
+        <script type="text/javascript"
+            src="{{ url_for('static', filename='js/files.js') }}"></script>
+    {% elif avatar_on %}
+        <script type="text/javascript"
+            src="{{ url_for('static', filename='js/avatar.js') }}"></script>
+    {% endif %}
+{% endblock %}

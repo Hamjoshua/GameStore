@@ -1,0 +1,21 @@
+{% set title = 'Ошибка' %}
+
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container text-white"
+     style="margin-top: 20%">
+    <div class="row align-items-end">
+        <div class="col">
+            <h1 style="font-size: 200px;">{{ code }}</h1>
+        </div>
+        <div class="col"><img class="image" src="{{ error_image }}" /></div>
+    </div>
+    <div class="row">
+        <div class="col">
+            <h1>{{ status }}</h1>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

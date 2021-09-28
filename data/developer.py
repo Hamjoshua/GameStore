@@ -9,3 +9,6 @@ class Developer(SqlAlchemyBase, SerializerMixin):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+
+    def __repr__(self):
+        return f'<Developer> id:{self.id} {self.name}'

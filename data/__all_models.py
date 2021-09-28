@@ -7,3 +7,4 @@ from data.platform_game import PlatformGame
 from data.publisher import Publisher
 from data.role import Role
 from data.user import User
+from data.user_game import UserGame

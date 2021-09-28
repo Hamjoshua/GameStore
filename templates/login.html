@@ -1,0 +1,25 @@
+{% set title = 'Вход в профиль' %}
+
+{% extends 'base.html' %}
+{% block content %}
+{% from "_formhelpers.html" import render_field %}
+
+{% for msg in get_flashed_messages() %}
+    {% if msg == 'Добро пожаловать!' %}
+        <p class="alert alert-success"><strong>{{ msg }}</strong></p>
+    {% else %}
+        <p class="alert alert-danger"><strong>Ошибка входа</strong> {{ msg }}</p>
+    {% endif %}
+{% endfor %}
+
+<h1 class="text-white text-center">Войти в профиль</h1>
+<form action="" method="post" class="text-white w-50 m-auto">
+    {{ form.hidden_tag() }}
+
+    {{ render_field(form.email) }}
+    {{ render_field(form.password) }}
+
+    <div class="m-auto mt-5 w-25">{{ form.submit(type="submit", class="btn btn-primary") }}</div>
+</form>
+
+{% endblock %}

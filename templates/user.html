@@ -1,0 +1,98 @@
+{% set title = user.login %}
+
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+body{
+  background-image: url("{{ user.body_bg_url }}") !important;
+  background-color: rgba(0,0,0,0.5) !important;
+  background-blend-mode: darken;
+  background-size: cover !important;
+}
+</style>
+
+<div class="container px-sm-4">
+    <div class="image-holder-avatar-user-big">
+        <img class="image-avatar-big m-auto shadow-lg" src="{{ user.avatar_url if user.avatar_url else '\static\missing_avatar.png' }}">
+        <div style="/*height: 50px;*/background-color: rgba(0,0,0,0.5);">
+            <p class="text-center text-white m-0 h2">{{ user.login }}</p>
+        </div>
+        <img class="{{ 'border' if user.bg_url else '' }} rounded-0 border-light image-avatar-user-bg" src="{{ user.bg_url if user.bg_url else '' }}">
+    </div>
+    <ul class="nav nav-tabs nav-fill text-uppercase link-dark bg-light">
+        <li class="nav-item shadow-lg"><a class="nav-link link-dark border-2 border-dark border-top-0 border-bottom-0 border-start-0">Действие</a></li>
+        <li class="nav-item shadow-lg"><a class="nav-link link-dark" href="#">действие</a></li>
+        <li class="nav-item border-dark shadow-lg"><a class="nav-link link-dark border-2 border-dark border-top-0 border-bottom-0 border-end-0" href="#">действие</a></li>
+    </ul>
+    <div class="bg-dark">
+        <div class="card text-white border-0" style="background-color: #343a40;">
+            <div class="card-header" style="background-color:#343a40">
+                <h5 class="mb-0">О себе</h5>
+            </div>
+            <div class="card-body bg-secondary bg-gradient border-primary m-2">
+                <p class="card-text">{{ user.description }}</p>
+            </div>
+        </div>
+        {% if games|length > 0 %}
+        <div class="card text-white border-0">
+                <div class="card-header" style="background-color:#343a40">
+                    <h5 class="mb-0">Библиотека</h5>
+                </div>
+                <div class="card-body bg-dark">
+                    <div class="carousel slide carousel-fade" data-bs-ride="carousel" id="carousel-1">
+                        <div class="carousel-inner">
+                            {% for game in games %}
+                        <div class="carousel-item {% if loop.first %} active {% endif %}">
+                            <a href="/game/{{ game.id }}" class="text-white">
+                            <div class="image-overlay-holder">
+                                <img class="d-block image-overlay m-auto" src="{{ get_images(game)[0] }}">
+                                <div class="card-img-overlay">
+                                    <h4>{{ game.name }}</h4>
+                                    <div id="description">
+                                        <p>{{ game.description }}</p>
+                                        <div class="platforms-container">
+                                        {% for platform in get_platforms(game) %}
+                                            <span class="badge bg-primary">{{ platform.name }}</span>
+                                        {% endfor %}
+                                        </div>
+                                        <div class="col flex-grow-0 image-holder-avatar-overlay">
+                                                <img class="d-lg-flex image-avatar" src="{{ get_images(game.publisher) }}">
+                                        </div>
+                                        <div class="col flex-grow-0 image-holder-avatar-overlay" style="right: 15%">
+                                                <img class="d-lg-flex image-avatar" src="{{ get_images(game.developer) }}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            </a>
+                        </div>
+                            {% endfor %}
+                        </div>
+                        <div>
+                            <a class="carousel-control-prev" href="#carousel-1" role="button" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </a>
+                            <a class="carousel-control-next" href="#carousel-1" role="button" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                                <span class="visually-hidden">Next</span>
+                            </a>
+                        </div>
+                        <ol class="carousel-indicators">
+                        {% for game in games %}
+                            {% if loop.first %}
+                            <li data-bs-target="#carousel-1" data-bs-slide-to="0" class="active"></li>
+                            {% else %}
+                            <li data-bs-target="#carousel-1" data-bs-slide-to="{{ loop.index - 1 }}"></li>
+                            {% endif %}
+                        {% endfor %}
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
