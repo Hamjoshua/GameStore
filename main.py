@@ -14,6 +14,7 @@ from forms.buy_game import BuyGame
 from forms.edit_user import EditUser
 from forms.edit_game import EditGame
 from forms.edit_publisher import EditPublisher
+from forms.lite_search import LiteSearch
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'amogus'
@@ -32,14 +33,12 @@ def unlogin_page(e):
 
 @app.errorhandler(403)
 def forbidden_page(e):
-    print(e)
     error_image = FORBIDDEN_IMAGE
     return render_template('error.html', code=403, error_image=error_image, status='Доступ отклонен')
 
 
 @app.errorhandler(404)
 def unknown_page(e):
-    print(e)
     error_image = NOT_FOUND_IMAGE
     return render_template('error.html', code=404,
                            error_image=error_image, status='Страница не найдена')
@@ -123,11 +122,12 @@ def game_page(game_id):
                            platforms=platforms, img_urls=img_urls, usergame=usergame)
 
 
-@app.route('/publisher/<int:pub_id>')
+@app.route('/publisher/<int:pub_id>', methods=['GET', 'POST'])
 def publisher_page(pub_id):
+    form = LiteSearch()
+
     db_sess = db_session.create_session()
     publisher = db_sess.query(Publisher).filter(Publisher.id == pub_id).first()
-    games = db_sess.query(Game).filter(Game.publisher_id == pub_id).all()
     genres = db_sess.query(Genre).join(GenreGame, GenreGame.genre_id == Genre.id).\
         join(Game, Game.id == GenreGame.game_id)\
         .filter(Game.publisher_id == pub_id).all()
@@ -137,16 +137,34 @@ def publisher_page(pub_id):
     developers = db_sess.query(Developer).join(Game, Game.developer_id == Developer.id)\
         .filter(Game.publisher_id == pub_id).all()
 
+    form.genres.choices = [(g.id, g.name) for g in genres]
+    form.platforms.choices = [(g.id, g.name) for g in platforms]
+
+    if request.method == 'POST':
+        able_genres = form.genres.data if form.genres.data else [g.id for g in genres]
+        able_platforms = form.platforms.data if form.platforms.data else [g.id for g in platforms]
+        print(able_genres, able_platforms)
+
+        games = db_sess.query(Game).join(PlatformGame, PlatformGame.game_id == Game.id)\
+            .join(GenreGame, GenreGame.game_id == Game.id)\
+            .filter((Game.publisher_id == pub_id) &
+                    (GenreGame.genre_id.in_(able_genres)) &
+                    (PlatformGame.platform_id.in_(able_platforms)))
+        print(games)
+        games = games.all()
+        print([game.name for game in games])
+    else:
+        games = db_sess.query(Game).filter(Game.publisher_id == pub_id).all()
+
     img_urls_dict = dict()
 
     for game in games:
         img_urls_dict[game] = get_images(game)[0]
 
     publisher_img_url = get_images(publisher)
-
     return render_template('publisher.html', games=games, genres=genres, developers=developers,
                            platforms=platforms, publisher=publisher, img_urls_dict=img_urls_dict,
-                           publisher_img_url=publisher_img_url)
+                           publisher_img_url=publisher_img_url, form=form)
 
 
 @app.route('/user/<int:user_id>')
@@ -241,7 +259,6 @@ def buy_game_page():
 
 @app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
 @login_required
-@admin_required
 def edit_user_page(user_id):
     if current_user.id != user_id:
         return abort(403)

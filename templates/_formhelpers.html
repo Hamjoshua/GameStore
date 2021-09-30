@@ -18,6 +18,8 @@
     {{ field(class='form-control', type='file', id=field.name, accept=".jpg, .jpeg, .png, .gif") }}
 {% elif field.type in ['IntegerField', 'FloatField'] %}
     {{ field(class='form-control', type='number') }}
+{% elif field.type == 'MultiCheckboxField' %}
+    {{ field(class='form-check form-control list-unstyled p-2') }}
 {% elif field.type == 'SubmitField' %}
     <div class="d-flex m-2">
         {{ field(type="submit", class="btn btn-success m-auto") }}
@@ -35,4 +37,27 @@
     {% endfor %}
 {% endif %}
 </div>
+{% endmacro %}
+
+{% macro render_multiply_checkbox(field) %}
+
+<div class="card" style="background-color:#495057">
+    <div class="card-header">
+        <h5 class="mb-0">{{ field.label }}</h5>
+    </div>
+    <ul class="card-body" id="{{ field.id }}">
+            {% for tuple in field.choices %}
+            <li class="form-check"><input class="form-check-input"
+                                           type="checkbox"
+                                           id="{{ field.id }}-{{ tuple[0] }}"
+                                           name="{{ field.id }}"
+                                           value="{{ tuple[0] }}">
+                <label
+                    class="form-check-label"
+                    for="{{ field.id }}-{{ tuple[0] }}">{{ tuple[1] }}</label>
+            </li>
+            {% endfor %}
+    </ul>
+</div>
+
 {% endmacro %}

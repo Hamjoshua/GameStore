@@ -1,4 +1,7 @@
 {% set title = user.login %}
+{% if current_user.id == user.id %}
+    {% set can_edit = True %}
+{% endif %}
 
 {% extends 'base.html' %}
 {% block content %}
