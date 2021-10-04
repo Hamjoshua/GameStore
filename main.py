@@ -110,7 +110,6 @@ def game_page(game_id):
     db_sess = db_session.create_session()
     game = db_sess.query(Game).filter(Game.id == game_id).first()
     genres = db_sess.query(GenreGame).filter(GenreGame.game_id == game_id).all()
-    platforms = db_sess.query(PlatformGame).filter(PlatformGame.game_id == game_id).all()
     img_urls = get_images(game)
 
     usergame = None
@@ -118,8 +117,7 @@ def game_page(game_id):
         usergame = db_sess.query(UserGame). \
             filter((UserGame.game_id == game_id) & (UserGame.user_id == current_user.id)).first()
 
-    return render_template('game.html', game=game, genres=genres,
-                           platforms=platforms, img_urls=img_urls, usergame=usergame)
+    return render_template('game.html', game=game, img_urls=img_urls, usergame=usergame)
 
 
 @app.route('/publisher/<int:pub_id>', methods=['GET', 'POST'])
@@ -143,16 +141,14 @@ def publisher_page(pub_id):
     if request.method == 'POST':
         able_genres = form.genres.data if form.genres.data else [g.id for g in genres]
         able_platforms = form.platforms.data if form.platforms.data else [g.id for g in platforms]
-        print(able_genres, able_platforms)
 
         games = db_sess.query(Game).join(PlatformGame, PlatformGame.game_id == Game.id)\
             .join(GenreGame, GenreGame.game_id == Game.id)\
             .filter((Game.publisher_id == pub_id) &
                     (GenreGame.genre_id.in_(able_genres)) &
+                    (Game.name.ilike(f'%{form.search_field.data}%')) &
                     (PlatformGame.platform_id.in_(able_platforms)))
-        print(games)
         games = games.all()
-        print([game.name for game in games])
     else:
         games = db_sess.query(Game).filter(Game.publisher_id == pub_id).all()
 
@@ -387,6 +383,30 @@ def edit_developer_page(developer_id):
     return render_edit_content_page(form, developer_id, Developer)
 
 
+@app.route('/search', methods=['GET', 'POST'])
+def search_page():
+    db_sess = db_session.create_session()
+    form = LiteSearch()
+    games = db_sess.query(Game).all()
+    genres = db_sess.query(Genre).all()
+    platforms = db_sess.query(Platform).all()
+
+    form.genres.choices = [(g.id, g.name) for g in genres]
+    form.platforms.choices = [(g.id, g.name) for g in platforms]
+
+    if request.method == 'POST':
+        able_genres = form.genres.data if form.genres.data else [g.id for g in genres]
+        able_platforms = form.platforms.data if form.platforms.data else [g.id for g in platforms]
+
+        games = db_sess.query(Game).join(PlatformGame, PlatformGame.game_id == Game.id) \
+            .join(GenreGame, GenreGame.game_id == Game.id) \
+            .filter((GenreGame.genre_id.in_(able_genres)) &
+                    (Game.name.ilike(f'%{form.search_field.data}%')) &
+                    (PlatformGame.platform_id.in_(able_platforms))).all()
+
+    return render_template('search.html', form=form, games=games)
+
+
 def render_edit_content_page(form, persona_id, PersonaClass):
     db_sess = db_session.create_session()
     persona = db_sess.query(PersonaClass).get(persona_id)
@@ -505,7 +525,7 @@ def get_genres(game: Game):
     db_sess = db_session.create_session()
     genres = db_sess.query(Genre).\
         join(GenreGame, GenreGame.genre_id == Genre.id).\
-        filter(GenreGame.game_id == game.id)
+        filter(GenreGame.game_id == game.id).all()
     return genres
 
 
@@ -517,6 +537,7 @@ def send_js(path):
 if __name__ == '__main__':
     app.jinja_env.globals.update(get_images=get_images)
     app.jinja_env.globals.update(get_platforms=get_platforms)
+    app.jinja_env.globals.update(get_genres=get_genres)
     app.jinja_env.globals.update(is_admin=is_admin)
     db_session.global_init('db/gamestore.db')
     app.run(host='127.0.0.1', port=8080)

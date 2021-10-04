@@ -1,0 +1,74 @@
+{% set title = 'Поиск' %}
+{% from "_formhelpers.html" import render_field %}
+{% from "_formhelpers.html" import render_multiply_checkbox %}
+
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="text-white">
+    <div class="card-header" style="background-color:#343a40">
+        <h5 class="mb-0">Игры</h5>
+    </div>
+    <div class="card-body bg-dark">
+        <div class="row">
+            <div class="flex-row text-white">
+            <div>
+            <form action="" method="post" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+
+                {{ render_field(form.search_field) }}
+                {{ render_multiply_checkbox(form.genres) }}
+                {{ render_multiply_checkbox(form.platforms) }}
+                <input type="submit" id="submit" class="w-100 btn btn-info">
+            </form>
+            </div>
+
+            <div class="col">
+                {% for game in games %}
+                <div class="row" style="padding: 0 0 1em 1em">
+                    <div class="mb-5 flex-column align-items-center col-5 d-flex justify-content-between"
+                     style="background-color: #111; height:170px; justify-content: center">
+                        <a href="/game/{{ game.id }}" style="height: inherit">
+                            <img class="img-fluid shadow-lg" src="{{ get_images(game)[0] }}" style="height: inherit">
+                        </a>
+                        <div class="row align-items-center bg-secondary rounded-3">
+                            <div class="col p-0">
+                                <a type="button" class="btn btn-success" id="buy" href="buy/{{ game.id }}">
+                                    {% if game.price > 0 %}
+                                        Купить
+                                    {% else %}
+                                        Играть
+                                    {% endif %}
+                                </a>
+                            </div>
+                            <div class="col">
+                                <p class="card-text m-auto">
+                                    {% if game.price > 0 %}
+                                        {{ game.price }} ₽
+                                    {% else %}
+                                        Бесплатно
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col" id="pub_game_description">
+                        <a href="/game/{{ game.id }}" class="nav-link link-light my-1">
+                            <p class="lead">{{ game.name }}</p>
+                        </a>
+                        <p>{{ game.description }}<br><br></p>
+                    </div>
+                </div>
+                {% endfor %}
+                {% if not games %}
+                    <div class="align-items-center d-flex h-100 justify-content-center">
+                        По вашему запросу ничего не найдено. Попробуйте изменить параметры поиска
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+{% endblock %}

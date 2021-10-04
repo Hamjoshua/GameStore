@@ -1,5 +1,7 @@
 {% set title = game.name %}
 {% set can_edit = True %}
+{% set platforms = get_platforms(game) %}
+{% set genres = get_genres(game) %}
 
 {% extends 'base.html' %}
 {% block content %}
@@ -8,45 +10,24 @@
     <div style="background-color: #333"><h1>{{game.name}}</h1>
         <table class="table text-white" style="max-width: 20em; float:right; background-color: #111">
             <tr>
-                {% if genres|length == 1 %}
                 <th scope="row">
-                    Жанр
-                </th>
-                <td>
-                    {{ genres[0].genre.name }}
-                </td>
-
-                {% else %}
-                <th scope="row">
-                    Жанры
+                    {{ 'Жанр' if genres|length == 1 else 'Жанры' }}
                 </th>
                 <td>
                     {% for genre in genres %}
-                    {{ genre.genre.name }}{{ ", " if not loop.last else "" }}
+                        {{ genre.name }}{{ ", " if not loop.last else "" }}
                     {% endfor %}
                 </td>
-                {% endif %}
             </tr>
             <tr>
-                {% if platforms|length == 1 %}
                 <th scope="row">
-                    Платформа
-                </th>
-                <td>
-                    {{ platforms[0].platform.name }}
-                </td>
-
-                {% else %}
-                <th scope="row">
-                    Платформы
+                    {{ 'Платформа' if platforms|length == 1 else 'Платформы' }}
                 </th>
                 <td>
                     {% for platform in platforms %}
-                    {{ platform.platform.name }}
-                    {{ ", " if not loop.last else "" }}
+                        <span class="badge bg-primary">{{ platform.name }}</span>
                     {% endfor %}
                 </td>
-                {% endif %}
             </tr>
             <tr>
                 <th scope="row">
