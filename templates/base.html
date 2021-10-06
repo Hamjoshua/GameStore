@@ -22,7 +22,18 @@
     <a class="btn btn-success me-1" href="{{ url_for(request.endpoint, **request.view_args) }}/edit">Редактировать текущую страницу</a>
   {% endif %}
     {% if current_user.is_authenticated %}
-      <div class='dropdown text-white ms-auto'>
+      <div class="ms-auto">
+          <a href="/buy_game">
+            <img class="img-thumbnail" src="{{ url_for('static', filename='cart.png') }}" width="40px" height="40px">
+          {% if session.get(current_user.email, [])|length > 0 %}
+            <p class="accordion-body bg-danger p-1 position-absolute rounded-pill text-white"
+               style="margin-top: -50px;">
+                {{ session[current_user.email]|length }}
+            </p>
+          {% endif %}
+          </a>
+      </div>
+      <div class='dropdown text-white'>
           <button class="btn btn-secondary dropdown-toggle"
                   type='button' onclick='dropdownVoid(this)'>
               {{ current_user.login }}

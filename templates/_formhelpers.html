@@ -61,3 +61,42 @@
 </div>
 
 {% endmacro %}
+
+{% macro render_buy_submit(game, user) %}
+
+<div class="row align-items-center bg-secondary rounded-3">
+{% if game.id|string() in session.get(user.email, []) %}
+    <div class="col">
+        <a type="button" class="btn btn-info" href="/buy_game">
+            Посмотреть в корзине
+        </a>
+    </div>
+{% elif get_usergames(game) %}
+    <div class="col">
+        <a type="button" class="btn btn-warning" href="/user/1">
+            Посмотреть в библиотеке
+        </a>
+    </div>
+{% else %}
+    <div class="col p-0">
+        <a type="button" class="btn btn-success" id="buy" href="/add_to_cart/{{ game.id }}">
+            {% if game.price > 0 %}
+                Купить
+            {% else %}
+                Играть
+            {% endif %}
+        </a>
+    </div>
+    <div class="col">
+        <p class="card-text m-auto">
+            {% if game.price > 0 %}
+                {{ game.price }} ₽
+            {% else %}
+                Бесплатно
+            {% endif %}
+        </p>
+    </div>
+{% endif %}
+</div>
+
+{% endmacro %}

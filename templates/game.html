@@ -2,6 +2,7 @@
 {% set can_edit = True %}
 {% set platforms = get_platforms(game) %}
 {% set genres = get_genres(game) %}
+{% from "_formhelpers.html" import render_buy_submit %}
 
 {% extends 'base.html' %}
 {% block content %}
@@ -67,9 +68,10 @@
         <div style="margin-right: 20em">
             <div id="carousel-1" class="carousel slide carousel-fade"
                  data-bs-ride="carousel">
+                {% set images = get_images(game) %}
                 <ol class="carousel-indicators">
-                {% if img_urls|length != 1 %}
-                {% for _ in get_images(game) %}
+                {% if images|length != 1 %}
+                {% for _ in images %}
                     {% if loop.first %}
                     <li data-bs-target="#carousel-1" data-bs-slide-to="0" class="active"></li>
                     {% else %}
@@ -79,7 +81,7 @@
                 {% endif %}
                 </ol>
                 <div class="carousel-inner">
-                    {% for url in img_urls %}
+                    {% for url in images %}
                     <div class="carousel-item {% if loop.first %} active {% endif %}">
                         <div style="background-color: #111; height:450px; display:flex; justify-content: center">
                             <img src="{{ url }}" alt="..." style="height:inherit">
@@ -87,7 +89,7 @@
                     </div>
                     {% endfor %}
                 </div>
-                {% if img_urls|length != 1 %}
+                {% if images|length != 1 %}
                 <a class="carousel-control-prev" type="button"
                    data-bs-target="#carousel-1" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
@@ -106,27 +108,7 @@
         </div>
 </div>
 
-{% if usergame %}
-    <a href="/user/{{ current_user.id }}" class="btn btn-success float-end m-0">
-        Посмотреть в библиотеке
-    </a>
-{% else %}
-<form class="row align-items-center bg-secondary rounded-3 float-end m-0" action="" method="post">
-    <div class="col p-0">
-        <input type="submit" class="btn btn-success" id="buy" value="{% if game.price > 0 %}Купить{% else %}Играть{% endif %}">
-
-    </div>
-    <div class="col">
-        <p class="card-text m-auto">
-            {% if game.price > 0 %}
-                {{ game.price }} ₽
-            {% else %}
-                Бесплатно
-            {% endif %}
-        </p>
-    </div>
-</form>
-{% endif %}
+{{ render_buy_submit(game, current_user) }}
 
 
 {% endblock %}

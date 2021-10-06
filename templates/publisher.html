@@ -2,6 +2,7 @@
 {% set can_edit = True %}
 {% from "_formhelpers.html" import render_field %}
 {% from "_formhelpers.html" import render_multiply_checkbox %}
+{% from "_formhelpers.html" import render_buy_submit %}
 
 {% extends 'base.html' %}
 {% block content %}
@@ -83,26 +84,7 @@
                                     <a href="/game/{{ game.id }}" style="height: inherit">
                                         <img class="img-fluid shadow-lg" src="{{ img_urls_dict[game] }}" style="height: inherit">
                                     </a>
-                                    <div class="row align-items-center bg-secondary rounded-3">
-                                        <div class="col p-0">
-                                            <a type="button" class="btn btn-success" id="buy" href="buy/{{ game.id }}">
-                                                {% if game.price > 0 %}
-                                                    Купить
-                                                {% else %}
-                                                    Играть
-                                                {% endif %}
-                                            </a>
-                                        </div>
-                                        <div class="col">
-                                            <p class="card-text m-auto">
-                                                {% if game.price > 0 %}
-                                                    {{ game.price }} ₽
-                                                {% else %}
-                                                    Бесплатно
-                                                {% endif %}
-                                            </p>
-                                        </div>
-                                    </div>
+                                    {{ render_buy_submit(game, current_user) }}
                                 </div>
                                 <div class="col" id="pub_game_description">
                                     <a href="/game/{{ game.id }}" class="nav-link link-light my-1">

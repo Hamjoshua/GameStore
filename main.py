@@ -4,6 +4,7 @@ from werkzeug.utils import secure_filename
 import os
 import random
 import json
+import datetime
 
 from functools import wraps
 from data import db_session
@@ -24,6 +25,9 @@ login_manager.init_app(app)
 MISSING_IMAGE = '/static/missing.png'
 NOT_FOUND_IMAGE = '/static/not_found.png'
 FORBIDDEN_IMAGE = '/static/forbidden.png'
+
+
+app.permanent_session_lifetime = datetime.timedelta(days=7)
 
 
 @app.errorhandler(401)
@@ -104,20 +108,12 @@ def main_page():
 @app.route('/game/<int:game_id>', methods=['GET', 'POST'])
 def game_page(game_id):
     if request.method == 'POST':
-        buy_data = json.dumps({'game_id': game_id})
-        return redirect(url_for('.buy_game_page', buy_data=buy_data))
+        return redirect(f'/add_to_cart/{game_id}')
 
     db_sess = db_session.create_session()
     game = db_sess.query(Game).filter(Game.id == game_id).first()
-    genres = db_sess.query(GenreGame).filter(GenreGame.game_id == game_id).all()
-    img_urls = get_images(game)
 
-    usergame = None
-    if current_user.is_authenticated:
-        usergame = db_sess.query(UserGame). \
-            filter((UserGame.game_id == game_id) & (UserGame.user_id == current_user.id)).first()
-
-    return render_template('game.html', game=game, img_urls=img_urls, usergame=usergame)
+    return render_template('game.html', game=game)
 
 
 @app.route('/publisher/<int:pub_id>', methods=['GET', 'POST'])
@@ -184,7 +180,6 @@ def register_user_page():
         print(form.email)
         user_with_same_email = db_sess.query(User).filter(User.email == form.email.data).first()
         if user_with_same_email:
-            flash('Пользователь с таким почтовым адресом уже существует')
             return render_template('register.html', form=form)
 
         user = User()
@@ -198,7 +193,6 @@ def register_user_page():
         user.address = form.address.data
         db_sess.add(user)
         db_sess.commit()
-        flash('Добро пожаловать!')
         return redirect('/login')
     return render_template('register.html', form=form)
 
@@ -215,8 +209,6 @@ def login_user_page():
             if user.check_password(form.password.data):
                 login_user(user)
                 return redirect('/')
-            flash('Неверный пароль')
-        flash('Неверные данные')
         return render_template('login.html', form=form)
     return render_template('login.html', form=form)
 
@@ -224,32 +216,26 @@ def login_user_page():
 @app.route('/buy_game', methods=['GET', 'POST'])
 @login_required
 def buy_game_page():
-    def add_game_to_user():
-        usergame = UserGame()
-        usergame.game_id = buy_data_json['game_id']
-        usergame.user_id = current_user.id
-        db_sess.add(usergame)
-        db_sess.commit()
+    def add_games_to_user():
+        for game_id in cart_data:
+            usergame = UserGame()
+            usergame.game_id = game_id
+            usergame.user_id = current_user.id
+            db_sess.add(usergame)
+            db_sess.commit()
 
-    buy_data = request.args['buy_data']
-    # buy_data = session['buy_data']
-    buy_data_json = json.loads(buy_data)
-    if buy_data:
+    cart_data = [int(i) for i in session[current_user.email]]
+
+    if cart_data:
         form = BuyGame()
         db_sess = db_session.create_session()
         if form.validate_on_submit() and request.method == 'POST':
-            add_game_to_user()
+            add_games_to_user()
+            session.pop(current_user.email)
             return redirect(f'/user/{current_user.id}')
-        game = db_sess.query(Game).get(buy_data_json['game_id'])
-        if game.price == 0:
-            add_game_to_user()
-            return redirect(f'/user/{current_user.id}')
-
-        usergame = db_sess.query(UserGame).\
-            filter((UserGame.game_id == game.id) & (UserGame.user_id == current_user.id)).first()
-        if usergame:
-            return redirect('/')
-        return render_template('buy_game.html', game=game, form=form)
+        games = db_sess.query(Game).filter(Game.id.in_(cart_data))
+        finish_sum = sum([game.price for game in games])
+        return render_template('buy_game.html', games=games, form=form, finish_sum=finish_sum)
     return redirect('/')
 
 
@@ -529,15 +515,42 @@ def get_genres(game: Game):
     return genres
 
 
+def get_usergames(game: Game):
+    if current_user.is_authenticated:
+        db_sess = db_session.create_session()
+        usergames = db_sess.query(UserGame).filter((UserGame.user_id == current_user.id)
+                                                   & (UserGame.game_id == game.id)).all()
+        return usergames
+
+
 @app.route('/js/<path:path>')
 def send_js(path):
     return send_from_directory('js', path)
+
+
+@app.route('/add_to_cart/<int:game_id>')
+def add_to_cart_page(game_id):
+    if current_user.is_authenticated:
+        if current_user.email in session:
+            if str(game_id) not in session[current_user.email]:
+                session[current_user.email].append(str(game_id))
+                session.modified = True
+        else:
+            session[current_user.email] = [str(game_id)]
+    return redirect(redirect_url())
+
+
+def redirect_url(default='/'):
+    return request.args.get('next') or \
+           request.referrer or \
+           url_for(default)
 
 
 if __name__ == '__main__':
     app.jinja_env.globals.update(get_images=get_images)
     app.jinja_env.globals.update(get_platforms=get_platforms)
     app.jinja_env.globals.update(get_genres=get_genres)
+    app.jinja_env.globals.update(get_usergames=get_usergames)
     app.jinja_env.globals.update(is_admin=is_admin)
     db_session.global_init('db/gamestore.db')
     app.run(host='127.0.0.1', port=8080)
