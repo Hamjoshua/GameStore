@@ -118,44 +118,58 @@ def game_page(game_id):
 
 @app.route('/publisher/<int:pub_id>', methods=['GET', 'POST'])
 def publisher_page(pub_id):
+    return person_page(pub_id, Publisher)
+
+
+@app.route('/developer/<int:dev_id>', methods=['GET', 'POST'])
+def developer_page(dev_id):
+    return person_page(dev_id, Developer)
+
+
+def person_page(person_id, personClass):
     form = LiteSearch()
 
     db_sess = db_session.create_session()
-    publisher = db_sess.query(Publisher).filter(Publisher.id == pub_id).first()
+    person = db_sess.query(personClass).filter(personClass.id == person_id).first()
     genres = db_sess.query(Genre).join(GenreGame, GenreGame.genre_id == Genre.id).\
         join(Game, Game.id == GenreGame.game_id)\
-        .filter(Game.publisher_id == pub_id).all()
+        .filter(Game.publisher_id == person_id).all()
     platforms = db_sess.query(Platform).join(PlatformGame, PlatformGame.platform_id == Platform.id).\
         join(Game, Game.id == PlatformGame.game_id) \
-        .filter(Game.publisher_id == pub_id).all()
-    developers = db_sess.query(Developer).join(Game, Game.developer_id == Developer.id)\
-        .filter(Game.publisher_id == pub_id).all()
+        .filter(Game.publisher_id == person_id).all()
+    if personClass == Publisher:
+        developers = db_sess.query(Developer).join(Game, Game.developer_id == Developer.id)\
+            .filter(Game.publisher_id == person_id).all()
+    else:
+        developers = db_sess.query(Publisher).join(Game, Game.publisher_id == Publisher.id) \
+            .filter(Game.developer_id == person_id).all()
 
     form.genres.choices = [(g.id, g.name) for g in genres]
     form.platforms.choices = [(g.id, g.name) for g in platforms]
 
+    games = db_sess.query(Game)
     if request.method == 'POST':
         able_genres = form.genres.data if form.genres.data else [g.id for g in genres]
         able_platforms = form.platforms.data if form.platforms.data else [g.id for g in platforms]
 
-        games = db_sess.query(Game).join(PlatformGame, PlatformGame.game_id == Game.id)\
+        games = games.join(PlatformGame, PlatformGame.game_id == Game.id)\
             .join(GenreGame, GenreGame.game_id == Game.id)\
-            .filter((Game.publisher_id == pub_id) &
-                    (GenreGame.genre_id.in_(able_genres)) &
+            .filter((GenreGame.genre_id.in_(able_genres)) &
                     (Game.name.ilike(f'%{form.search_field.data}%')) &
                     (PlatformGame.platform_id.in_(able_platforms)))
-        games = games.all()
+    if personClass == Publisher:
+        games = games.filter(Game.publisher_id == person_id).all()
     else:
-        games = db_sess.query(Game).filter(Game.publisher_id == pub_id).all()
+        games = games.filter(Game.developer_id == person_id).all()
 
     img_urls_dict = dict()
 
     for game in games:
         img_urls_dict[game] = get_images(game)[0]
 
-    publisher_img_url = get_images(publisher)
+    publisher_img_url = get_images(person)
     return render_template('publisher.html', games=games, genres=genres, developers=developers,
-                           platforms=platforms, publisher=publisher, img_urls_dict=img_urls_dict,
+                           platforms=platforms, publisher=person, img_urls_dict=img_urls_dict,
                            publisher_img_url=publisher_img_url, form=form)
 
 
@@ -347,7 +361,6 @@ def edit_game_page(game_id):
         form.rating.data = game.rating
         form.old_img_urls.data = str(get_images(game))
         form.validate_on_submit()
-        # form.images.data = get_images(game)
 
     return render_template('edit_content.html', form=form, images_on=True,
                            game=game, title=f'Редактирование {game.name}')
@@ -526,6 +539,15 @@ def get_usergames(game: Game):
 @app.route('/js/<path:path>')
 def send_js(path):
     return send_from_directory('js', path)
+
+
+@app.route('/delete_from_cart/<int:game_id>')
+def delete_from_cart_page(game_id):
+    if current_user.is_authenticated:
+        if current_user.email in session:
+            session[current_user.email] = [i for i in session[current_user.email] if i != str(game_id)]
+            session.modified = True
+    return redirect(redirect_url())
 
 
 @app.route('/add_to_cart/<int:game_id>')

@@ -4,21 +4,31 @@
 {% block content %}
 {% from "_formhelpers.html" import render_field %}
 
-<div class="container d-flex align-items-center flex-column text-white" style="margin-top:10em">
+<div class="row align-items-center text-white" style="margin-top:10em">
+    <div class="col">
     {% for game in games %}
-        <p class="h2">{{ game.name }}</p>
-        <div class="image-holder w-50">
-            <img class="image" src="{{ get_images(game)[0] }}">
+        <div class="bg-dark card mb-5 mx-3 w-50">
+            <div class="image-holder">
+                <img class="img-fluid" src="{{ get_images(game)[0] }}">
+            </div>
+            <div class="card-body ">
+                <h2>{{ game.name }}</h2>
+                <a type="button" class="btn btn-danger" href="/delete_from_cart/{{ game.id }}">Удалить из корзины</a>
+            </div>
         </div>
     {% endfor %}
-    <p class="h6">Вы собираетесь потратить {{ finish_sum }} ₽</p>
-    <p class="h6 w-75 text-center">Введите код, который пришел в письме на ваш почтовый ящик, чтобы подтвердить покупку</p>
-    <form action="" method="post" class="align-items-end d-flex justify-content-center mt-5">
-        {{ form.hidden_tag() }}
+    </div>
 
-        {{ render_field(form.code) }}
-        <div class="mx-1">{{ form.submit(type="submit", class="btn btn-success") }}</div>
-    </form>
+    <div class="col">
+        <p class="h6">Вы собираетесь потратить {{ finish_sum }} ₽</p>
+        <p class="h6">Введите код, который пришел в письме на ваш почтовый ящик, чтобы подтвердить покупку</p>
+        <form action="" method="post" class="align-items-end d-flex mt-5">
+            {{ form.hidden_tag() }}
+
+            {{ render_field(form.code) }}
+            <div class="mx-1">{{ form.submit(type="submit", class="btn btn-success") }}</div>
+        </form>
+    </div>
 </div>
 
 {% endblock %}

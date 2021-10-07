@@ -15,33 +15,38 @@
         <div class="col">
             <h1 class="text-white">{{ publisher.name }}</h1>
             <ul class="nav shadow-lg" style="background-color:#495057">
-                <li class="nav-item"><a class="nav-link active link-light" href="#">О издателе</a>
-                </li>
-                <li class="nav-item"><a class="nav-link link-light" href="#">Разработчики</a></li>
-                <li class="nav-item"><a class="nav-link link-light" href="#">Игры</a></li>
+                {% if publisher.__tablename__ == 'publisher' %}
+                    <li class="nav-item"><a class="nav-link active link-light" href="#about">О издателе</a></li>
+                    <li class="nav-item"><a class="nav-link link-light" href="#coworking">Разработчики</a></li>
+                {% else %}
+                    <li class="nav-item"><a class="nav-link active link-light" href="#about">О разработчике</a></li>
+                    <li class="nav-item"><a class="nav-link link-light" href="#coworking">Издатели</a></li>
+                {% endif %}
+                <li class="nav-item"><a class="nav-link link-light" href="#games">Игры</a></li>
                 <li class="nav-item"></li>
             </ul>
         </div>
     </div>
     <div class="row">
         <div class="col">
-            <div class="text-white">
+            <div class="text-white" id="about">
                 <div class="card-header" style="background-color:#343a40">
-                    <h5 class="mb-0">О издателе</h5>
+                    <h5 class="mb-0">{{ 'О издателе' if publisher.__tablename__ == 'publisher' else 'О разработчике' }}</h5>
                 </div>
                 <div class="card-body bg-dark">
                     <p class="card-text">{{ publisher.description }}</p>
                 </div>
             </div>
             {% if developers %}
-            <div class="text-white">
+            <div class="text-white" id="coworking">
                 <div class="card-header" style="background-color:#343a40">
-                    <h5 class="mb-0">Разработчики</h5>
+                    <h5 class="mb-0">{{ 'Разработчики' if publisher.__tablename__ == 'publisher' else 'Издатели' }}</h5>
                 </div>
                 <div class="card-body bg-dark">
                     {% for dev in developers %}
                     <div class="row">
                         {% if dev.name != publisher.name %}
+                        <a href="/{{ dev.__tablename__ }}/{{ dev.id }}" class="row text-decoration-none text-white">
                             <div class="col-auto">
                                 <div class="image-holder-avatar">
                                     <img class="d-lg-flex image-avatar" src="{{ get_images(dev) }}">
@@ -50,6 +55,7 @@
                             <div class="col d-flex m-auto">
                                 {{ dev.name }} - {{ dev.description }}
                             </div>
+                        </a>
                         {% endif %}
                     </div>
                     {% endfor %}
@@ -58,7 +64,7 @@
             {% endif %}
 
             {% if genres %}
-            <div class="text-white">
+            <div class="text-white" id="games">
                 <div class="card-header" style="background-color:#343a40">
                     <h5 class="mb-0">Игры</h5>
                 </div>

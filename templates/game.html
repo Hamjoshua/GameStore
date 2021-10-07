@@ -35,7 +35,9 @@
                     Разработчик
                 </th>
                 <td>
-                    {{ game.developer.name }}
+                    <a href="/developer/{{ game.developer.id }}" class="link-warning">
+                        {{ game.developer.name }}
+                    </a>
                 </td>
             </tr>
             <tr>
