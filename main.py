@@ -25,6 +25,7 @@ login_manager.init_app(app)
 MISSING_IMAGE = '/static/missing.png'
 NOT_FOUND_IMAGE = '/static/not_found.png'
 FORBIDDEN_IMAGE = '/static/forbidden.png'
+MISSING_AVATAR = '/static/missing_avatar.png'
 
 
 app.permanent_session_lifetime = datetime.timedelta(days=7)
@@ -238,7 +239,7 @@ def buy_game_page():
             db_sess.add(usergame)
             db_sess.commit()
 
-    cart_data = [int(i) for i in session[current_user.email]]
+    cart_data = [int(i) for i in session.get(current_user.email, [])]
 
     if cart_data:
         form = BuyGame()
@@ -250,7 +251,7 @@ def buy_game_page():
         games = db_sess.query(Game).filter(Game.id.in_(cart_data))
         finish_sum = sum([game.price for game in games])
         return render_template('buy_game.html', games=games, form=form, finish_sum=finish_sum)
-    return redirect('/')
+    return redirect(redirect_url())
 
 
 @app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
@@ -288,7 +289,7 @@ def edit_user_page(user_id):
         if file_avatar:
             avatar_url = f'/static/user/avatar/{file_avatar.filename}'
             file_avatar.save(avatar_url[1:])
-            if user.avatar_url:
+            if user.avatar_url and user.avatar_url:
                 os.remove(user.avatar_url[1:])
             user.avatar_url = avatar_url
 
@@ -499,7 +500,7 @@ def get_top_image(img_path):
     for _, _, filenames in os.walk(img_path):
         if filenames:
             return '/'.join(['', img_path, filenames[0]])
-    return '/static/missing_avatar.png'
+    return MISSING_AVATAR
 
 
 def get_all_images(img_path):
