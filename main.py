@@ -241,17 +241,15 @@ def buy_game_page():
 
     cart_data = [int(i) for i in session.get(current_user.email, [])]
 
-    if cart_data:
-        form = BuyGame()
-        db_sess = db_session.create_session()
-        if form.validate_on_submit() and request.method == 'POST':
-            add_games_to_user()
-            session.pop(current_user.email)
-            return redirect(f'/user/{current_user.id}')
-        games = db_sess.query(Game).filter(Game.id.in_(cart_data))
-        finish_sum = sum([game.price for game in games])
-        return render_template('buy_game.html', games=games, form=form, finish_sum=finish_sum)
-    return redirect(redirect_url())
+    form = BuyGame()
+    db_sess = db_session.create_session()
+    if form.validate_on_submit() and request.method == 'POST':
+        add_games_to_user()
+        session.pop(current_user.email)
+        return redirect(f'/user/{current_user.id}')
+    games = db_sess.query(Game).filter(Game.id.in_(cart_data)).all()
+    finish_sum = sum([game.price for game in games])
+    return render_template('buy_game.html', games=games, form=form, finish_sum=finish_sum)
 
 
 @app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])

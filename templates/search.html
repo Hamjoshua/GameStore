@@ -12,16 +12,15 @@
     </div>
     <div class="card-body bg-dark">
         <div class="row">
-            <div class="flex-row text-white">
-            <div>
-            <form action="" method="post" enctype="multipart/form-data">
-                {{ form.hidden_tag() }}
+            <div class="col-3">
+                <form action="" method="post" enctype="multipart/form-data">
+                    {{ form.hidden_tag() }}
 
-                {{ render_field(form.search_field) }}
-                {{ render_multiply_checkbox(form.genres) }}
-                {{ render_multiply_checkbox(form.platforms) }}
-                <input type="submit" id="submit" class="w-100 btn btn-info">
-            </form>
+                    {{ render_field(form.search_field) }}
+                    {{ render_multiply_checkbox(form.genres) }}
+                    {{ render_multiply_checkbox(form.platforms) }}
+                    <input type="submit" id="submit" class="w-100 btn btn-info">
+                </form>
             </div>
 
             <div class="col">

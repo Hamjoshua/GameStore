@@ -4,7 +4,8 @@
 {% block content %}
 {% from "_formhelpers.html" import render_field %}
 
-<div class="row align-items-center text-white" style="margin-top:10em">
+{% if games %}
+    <div class="row align-items-center text-white" style="margin-top:10em">
     <div class="col">
     {% for game in games %}
         <div class="bg-dark card mb-5 mx-3 w-50">
@@ -30,5 +31,12 @@
         </form>
     </div>
 </div>
-
+{% else %}
+    <div class="d-flex align-items-center text-white footer py-5 flex-column">
+        <p>У вас в корзинке как-то пусто...</p>
+        <a class="btn btn-success" href="/search">
+            Отправиться за покупками
+        </a>
+    </div>
+{% endif %}
 {% endblock %}
