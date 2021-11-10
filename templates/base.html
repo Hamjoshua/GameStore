@@ -39,6 +39,9 @@
               {{ current_user.login }}
           </button>
           <div class='dropdown-menu dropdown-menu-end'>
+            {% if is_admin(current_user) %}
+              <a href="/admin" class='dropdown-item'>Панель администрирования</a>
+            {% endif %}
             <a href="/user/{{ current_user.id }}/edit" class='dropdown-item'>Редактировать страницу</a>
             <a href="/user/{{ current_user.id }}" class='dropdown-item'>Моя страница</a>
             <a href="/logout" class='dropdown-item'>Выйти</a>

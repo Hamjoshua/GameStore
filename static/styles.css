@@ -117,3 +117,10 @@
   height: 4em;
   word-break: break-word;
 }
+
+.drop-zone{
+  background-color: white !important;
+  border: 1px black solid;
+  padding: 2em;
+  color: black;
+}

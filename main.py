@@ -38,8 +38,7 @@ def unlogin_page(e):
 
 @app.errorhandler(403)
 def forbidden_page(e):
-    error_image = FORBIDDEN_IMAGE
-    return render_template('error.html', code=403, error_image=error_image, status='Доступ отклонен')
+    return redirect('/')
 
 
 @app.errorhandler(404)
@@ -113,6 +112,8 @@ def game_page(game_id):
 
     db_sess = db_session.create_session()
     game = db_sess.query(Game).filter(Game.id == game_id).first()
+    if not game:
+        abort(404)
 
     return render_template('game.html', game=game)
 
@@ -132,18 +133,25 @@ def person_page(person_id, personClass):
 
     db_sess = db_session.create_session()
     person = db_sess.query(personClass).filter(personClass.id == person_id).first()
-    genres = db_sess.query(Genre).join(GenreGame, GenreGame.genre_id == Genre.id).\
-        join(Game, Game.id == GenreGame.game_id)\
-        .filter(Game.publisher_id == person_id).all()
-    platforms = db_sess.query(Platform).join(PlatformGame, PlatformGame.platform_id == Platform.id).\
-        join(Game, Game.id == PlatformGame.game_id) \
-        .filter(Game.publisher_id == person_id).all()
+
+    if not person:
+        abort(404)
+
+    genres = db_sess.query(Genre).join(GenreGame, GenreGame.genre_id == Genre.id). \
+        join(Game, Game.id == GenreGame.game_id)
+    platforms = db_sess.query(Platform).join(PlatformGame, PlatformGame.platform_id == Platform.id). \
+        join(Game, Game.id == PlatformGame.game_id)
+
     if personClass == Publisher:
         developers = db_sess.query(Developer).join(Game, Game.developer_id == Developer.id)\
             .filter(Game.publisher_id == person_id).all()
+        genres = genres.filter(Game.publisher_id == person_id).all()
+        platforms = platforms.filter(Game.publisher_id == person_id).all()
     else:
         developers = db_sess.query(Publisher).join(Game, Game.publisher_id == Publisher.id) \
             .filter(Game.developer_id == person_id).all()
+        genres = genres.filter(Game.developer_id == person_id).all()
+        platforms = platforms.filter(Game.developer_id == person_id).all()
 
     form.genres.choices = [(g.id, g.name) for g in genres]
     form.platforms.choices = [(g.id, g.name) for g in platforms]
@@ -163,21 +171,18 @@ def person_page(person_id, personClass):
     else:
         games = games.filter(Game.developer_id == person_id).all()
 
-    img_urls_dict = dict()
-
-    for game in games:
-        img_urls_dict[game] = get_images(game)[0]
-
-    publisher_img_url = get_images(person)
     return render_template('publisher.html', games=games, genres=genres, developers=developers,
-                           platforms=platforms, publisher=person, img_urls_dict=img_urls_dict,
-                           publisher_img_url=publisher_img_url, form=form)
+                           platforms=platforms, publisher=person, form=form)
 
 
 @app.route('/user/<int:user_id>')
 def user_page(user_id):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        abort(404)
+
     games = db_sess.query(Game)\
         .join(UserGame, UserGame.game_id == Game.id)\
         .join(User, User.id == UserGame.user_id)\
@@ -322,20 +327,25 @@ def edit_game_page(game_id):
         if not game:
             game = Game()
             is_new_game = True
+        game.id = game_id
         game.name = form.name.data
         game.description = form.description.data
         game.rating = form.rating.data
+        game.price = form.price.data
         game.release_date = form.release_date.data
         game.publisher_id = form.publisher.data
         game.developer_id = form.developer.data
         if is_new_game:
             db_sess.add(game)
+            db_sess.commit()
 
-        clear_folder(game, form.old_img_urls.data)
+        files_from_request = request.files
+
+        clear_folder(game, files_from_request)
         counter = 1
-        for key in request.files:
-            file = request.files[key]
-            if file.filename:
+        for key in files_from_request:
+            file = files_from_request[key]
+            if file.filename and '/' not in file.filename:
                 img_path = f'/static/game/{game_id}/{counter}.{file.filename.split(".")[1]}'
                 file.save(img_path[1:])
             counter += 1
@@ -349,6 +359,7 @@ def edit_game_page(game_id):
     form.platforms.choices = [(g.id, g.name) for g in db_sess.query(Platform)]
     form.developer.choices = [(g.id, g.name) for g in db_sess.query(Developer)]
     form.publisher.choices = [(g.id, g.name) for g in db_sess.query(Publisher)]
+    title = 'Создание новой игры'
     if game:
         form.name.data = game.name
         form.genres.data = [g.id for g in get_genres(game)]
@@ -358,11 +369,12 @@ def edit_game_page(game_id):
         form.description.data = game.description
         form.release_date.data = game.release_date
         form.rating.data = game.rating
-        form.old_img_urls.data = str(get_images(game))
+        form.price.data = game.price
         form.validate_on_submit()
+        title = f'Редактирование {game.name}'
 
     return render_template('edit_content.html', form=form, images_on=True,
-                           game=game, title=f'Редактирование {game.name}')
+                           game=game, title=title)
 
 
 @app.route('/publisher/<int:publisher_id>/edit', methods=['GET', 'POST'])
@@ -405,6 +417,16 @@ def search_page():
     return render_template('search.html', form=form, games=games)
 
 
+@app.route('/admin')
+@admin_required
+def admin_page():
+    db_sess = db_session.create_session()
+    game_new_id = db_sess.query(Game.id).order_by(Game.id.desc()).first()[0] + 1
+    dev_new_id = db_sess.query(Developer.id).order_by(Developer.id.desc()).first()[0] + 1
+    pub_new_id = db_sess.query(Publisher.id).order_by(Publisher.id.desc()).first()[0] + 1
+    return render_template("admin.html", game_new_id=game_new_id, dev_new_id=dev_new_id, pub_new_id=pub_new_id)
+
+
 def render_edit_content_page(form, persona_id, PersonaClass):
     db_sess = db_session.create_session()
     persona = db_sess.query(PersonaClass).get(persona_id)
@@ -427,13 +449,15 @@ def render_edit_content_page(form, persona_id, PersonaClass):
         db_sess.commit()
         return redirect(f'/{persona.__tablename__}/{persona_id}')
 
+    title = f"Создание нового {'разработчика' if PersonaClass == Developer else 'издателя'}"
     if persona:
         form.name.data = persona.name
         form.description.data = persona.description
         form.avatar_url.data = get_images(persona)
+        title = f'Редактирование {persona.name}'
 
     return render_template('edit_content.html', form=form, avatar_on=True,
-                           titile=f'Редактирование {persona.name}')
+                           tile=title)
 
 
 def update_genres(form, db_sess, game_id, game):
@@ -474,14 +498,15 @@ def update_platforms(form, db_sess, game_id, game):
             db_sess.commit()
 
 
-def clear_folder(sql_object, old_objects=[]):
+def clear_folder(sql_object, new_files):
     img_path = f'static/{sql_object.__tablename__}/{sql_object.id}'
+    list_of_new_filenames = [new_files[key].filename for key in new_files]
     if not os.path.exists(img_path):
         os.mkdir(img_path)
     for _, _, filename in os.walk(img_path):
         for fn in filename:
             full_filename = f'{img_path}/{fn}'
-            if os.path.isfile(full_filename) and ('/' + full_filename) not in old_objects:
+            if os.path.isfile(full_filename) and ('/' + full_filename) not in list_of_new_filenames:
                 os.remove(full_filename)
 
 

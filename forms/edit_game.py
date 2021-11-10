@@ -1,18 +1,11 @@
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, StringField, validators, SelectField,\
-    SelectMultipleField, DateField, FloatField, TextAreaField, widgets, HiddenField
-from wtforms.widgets import FileInput
-from wtforms.fields import FileField
+    SelectMultipleField, DateField, FloatField, TextAreaField, widgets, IntegerField
 
 
 class MultiCheckboxField(SelectMultipleField):
     widget = widgets.ListWidget(prefix_label=False)
     option_widget = widgets.CheckboxInput()
-
-
-class MultiFileExpandableField(SelectMultipleField):
-    widget = widgets.ListWidget(prefix_label=False)
-    option_widget = widgets.FileInput()
 
 
 class EditGame(FlaskForm):
@@ -24,5 +17,5 @@ class EditGame(FlaskForm):
     release_date = DateField('Дата релиза')
     rating = FloatField('Рейтинг', [validators.NumberRange(min=0, max=10)])
     description = TextAreaField('Описание')
+    price = IntegerField('Стоимость', [validators.NumberRange(min=0)])
     submit = SubmitField('Подтвердить')
-    old_img_urls = HiddenField('Старые файлы')

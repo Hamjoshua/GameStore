@@ -15,23 +15,30 @@
             <div id="carousel-1" class="carousel slide carousel-fade"
                  data-bs-ride="carousel">
                 <ol class="carousel-indicators">
-                {% if img_urls|length != 1 %}
                 {% for _ in img_urls %}
                     {% if loop.first %}
-                    <li data-bs-target="#carousel-1" data-bs-slide-to="0" class="active"></li>
+                        <li data-bs-target="#carousel-1" data-bs-slide-to="0" class="active"></li>
                     {% else %}
-                    <li data-bs-target="#carousel-1" data-bs-slide-to="{{ loop.index - 1 }}"></li>
+                        <li data-bs-target="#carousel-1" data-bs-slide-to="{{ loop.index - 1 }}"></li>
                     {% endif %}
                 {% endfor %}
-                {% endif %}
                 </ol>
                 <div class="carousel-inner">
                     {% for url in img_urls %}
-                    <div class="carousel-item {% if loop.first %} active {% endif %}" id="carousel-item{{ loop.index - 1 }}">
-                        <div class="image-holder-game">
-                            <img src="{{ url }}" alt="..." id="image{{ loop.index - 1 }}">
+                        <div class="carousel-item {% if loop.first %} active {% endif %}" id="carousel-item{{ loop.index - 1 }}">
+                            <div class="d-flex justify-content-center" style="bottom: 10%;">
+                                <button class="btn btn-danger" type="button">
+                                    <img src="{{ url_for('static', filename='remove_icon.png') }}" width="15px" height="15px">
+                                </button>
+                                <label for="file{{ loop.index - 1 }}">
+                                    <span class="btn btn-success">
+                                        <img src="{{ url_for('static', filename='download_icon.png') }}" width="15px" height="15px">
+                                    </span>
+                                </label>
+                            </div>
+                            <img class="w-100 d-block img-fluid" src="{{ url }}" id="image{{ loop.index - 1 }}" alt="Slide Image" />
+                            <input class="d-none" type="file" id="file{{ loop.index - 1 }}" name="file{{ loop.index - 1 }}"/>
                         </div>
-                    </div>
                     {% endfor %}
                 </div>
 
@@ -48,17 +55,8 @@
 
             </div>
 
-            <div id="fileList" class="d-flex flex-column pt-3 px-5 pb-1 mt-1 mb-1 bg-dark">
-                {% for url in img_urls %}
-                    <div id="fileField{{ loop.index - 1 }}" class="d-flex justify-content-center">
-                        <input type="file"
-                               id="file{{ loop.index - 1 }}" name="file{{ loop.index - 1 }}"
-                               class="form-control">
-                        <input class="btn btn-danger" value="Удалить" type="button">
-                    </div>
-                {% endfor %}
-            </div>
-            <input type="button" class="btn btn-success d-lg-table m-auto" id="addBtn" value="Добавить">
+            <input type="button" class="btn w-100 btn-success d-lg-table m-auto"
+                   id="addBtn" value="Нажмите для добавления элемента или перетащите файлы">
         {% endif %}
         <table class="table text-white" style="max-width: 20em; float:right; background-color: #111">
             {% for field in form %}
@@ -77,4 +75,7 @@
         <script type="text/javascript"
             src="{{ url_for('static', filename='js/avatar.js') }}"></script>
     {% endif %}
+<script>
+    preloadImages({{ img_urls|string|safe }});
+</script>
 {% endblock %}

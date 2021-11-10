@@ -10,7 +10,7 @@
 <div class="container bg-dark">
     <div class="row">
         <div class="col flex-grow-0 image-holder-avatar">
-            <img class="d-lg-flex image-avatar" src="{{ publisher_img_url }}">
+            <img class="d-lg-flex image-avatar" src="{{ get_images(publisher) }}">
         </div>
         <div class="col">
             <h1 class="text-white">{{ publisher.name }}</h1>
@@ -87,7 +87,7 @@
                                 <div class="mb-5 flex-column align-items-center col-5 d-flex justify-content-between"
                                  style="background-color: #111; height:170px; justify-content: center">
                                     <a href="/game/{{ game.id }}" style="height: inherit">
-                                        <img class="img-fluid shadow-lg" src="{{ img_urls_dict[game] }}" style="height: inherit">
+                                        <img class="img-fluid shadow-lg" src="{{ get_images(game)[0] }}" style="height: inherit">
                                     </a>
                                     {{ render_buy_submit(game, current_user) }}
                                 </div>

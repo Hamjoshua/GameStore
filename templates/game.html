@@ -73,22 +73,22 @@
                 {% set images = get_images(game) %}
                 <ol class="carousel-indicators">
                 {% if images|length != 1 %}
-                {% for _ in images %}
-                    {% if loop.first %}
-                    <li data-bs-target="#carousel-1" data-bs-slide-to="0" class="active"></li>
-                    {% else %}
-                    <li data-bs-target="#carousel-1" data-bs-slide-to="{{ loop.index - 1 }}"></li>
-                    {% endif %}
-                {% endfor %}
+                    {% for _ in images %}
+                        {% if loop.first %}
+                        <li data-bs-target="#carousel-1" data-bs-slide-to="0" class="active"></li>
+                        {% else %}
+                        <li data-bs-target="#carousel-1" data-bs-slide-to="{{ loop.index - 1 }}"></li>
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
                 </ol>
                 <div class="carousel-inner">
                     {% for url in images %}
-                    <div class="carousel-item {% if loop.first %} active {% endif %}">
-                        <div style="background-color: #111; height:450px; display:flex; justify-content: center">
-                            <img src="{{ url }}" alt="..." style="height:inherit">
+                        <div class="carousel-item {% if loop.first %} active {% endif %}">
+                            <div style="background-color: #111; height:450px; display:flex; justify-content: center">
+                                <img src="{{ url }}" alt="..." style="height:inherit">
+                            </div>
                         </div>
-                    </div>
                     {% endfor %}
                 </div>
                 {% if images|length != 1 %}
